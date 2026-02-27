@@ -161,13 +161,13 @@
                         const parsedData = JSON.parse(event.target.result);
                         if (Array.isArray(parsedData)) {
                             setAdmins(parsedData);
-                            alert("тЬЕ Data Restored Successfully!");
+                            alert("Data Restored Successfully!");
                             setShowMenu(false);
                         } else {
-                            alert("тЭМ Invalid Backup File Format!");
+                            alert(" Invalid Backup File Format!");
                         }
                     } catch (error) {
-                        alert("тЭМ Error reading the file! Make sure it's a valid JSON.");
+                        alert(" Error reading the file! Make sure it's a valid JSON.");
                     }
                 };
                 reader.readAsText(file);
