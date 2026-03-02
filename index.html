@@ -86,22 +86,30 @@
                 return `${Math.floor(months / 12)} Y ${months % 12} M`;
             };
 
-            // Process Chart Data (Month wise based on System Entry Time)
-            const chartData = useMemo(() => {
-                const data = {};
-                admins.forEach(ad => {
-                    const date = new Date(ad.id); 
-                    const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
-                    
-                    if (!data[monthYear]) {
-                        data[monthYear] = { active: 0, inactive: 0 };
-                    }
-                    
-                    ad.isActive ? data[monthYear].active++ : data[monthYear].inactive++;
-                });
-                return data;
-            }, [admins]);
-
+            // Process Chart Data (Month wise Current Snapshot)
+const chartData = useMemo(() => {
+    // ১. আগের সেভ করা চার্টের হিস্ট্রি লোকাল স্টোরেজ থেকে নিচ্ছি (না থাকলে ফাকা অবজেক্ট)
+    let history = JSON.parse(localStorage.getItem('biom_chart_history')) || {};
+    
+    // ২. বর্তমানে সিস্টেমের "মোট" অ্যাক্টিভ এবং ইনঅ্যাক্টিভ এডমিন বের করছি
+    const totalActive = admins.filter(a => a.isActive).length;
+    const totalInactive = admins.filter(a => !a.isActive).length;
+    
+    // ৩. বর্তমান মাস ও বছর বের করছি (যেমন: Mar 2026)
+    const currentMonth = new Date().toLocaleString('default', { month: 'short', year: 'numeric' });
+    
+    // ৪. চার্টের হিস্ট্রিতে শুধুমাত্র "বর্তমান মাসের" ডেটা আপডেট করছি 
+    // (ফলে আগের মাসগুলোর ডেটা যেমন ছিল তেমনই লক হয়ে থাকবে, কোনো পরিবর্তন হবে না)
+    history[currentMonth] = { 
+        active: totalActive, 
+        inactive: totalInactive 
+    };
+    
+    // ৫. আপডেট করা হিস্ট্রি আবার লোকাল স্টোরেজে সেভ করে রাখছি
+    localStorage.setItem('biom_chart_history', JSON.stringify(history));
+    
+    return history;
+}, [admins]);
             // Save Admin
             const handleSaveAdmin = (e) => {
                 e.preventDefault();
